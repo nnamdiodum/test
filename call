@@ -1,0 +1,37 @@
+$('.task-completion-check').change(function() {
+    var taskId = $(this).data('taskId'); // Assuming you have a way to identify the task ID
+    var isCompleted = $(this).is(':checked');
+    $.ajax({
+        url: '/task/update', // Assuming this is your endpoint
+        type: 'POST',
+        data: {
+            id: taskId,
+            isCompleted: isCompleted
+        },
+        success: function(response) {
+            // Handle success
+        },
+        error: function(error) {
+            // Handle error
+        }
+    });
+});
+
+$('.subtask-completion-check').change(function() {
+    var subtaskId = $(this).data('subtaskId'); // Assuming you have a way to identify the subtask ID
+    var isCompleted = $(this).is(':checked');
+    $.ajax({
+        url: '/subtask/update', // Assuming this is your endpoint
+        type: 'POST',
+        data: {
+            id: subtaskId,
+            isCompleted: isCompleted
+        },
+        success: function(response) {
+            // Handle success
+        },
+        error: function(error) {
+            // Handle error
+        }
+    });
+});
