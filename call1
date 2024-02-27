@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task and Subtask Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .subtask-table, .subtask-table th, .subtask-table td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            width: 100%;
+            margin: auto;
+        }
+        .subtask-table th, .subtask-table td {
+            padding: 5px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<form id="taskForm">
+    <input type="hidden" id="taskId" name="taskId"> <!-- Hidden ID field for the Task -->
+    <table>
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Action Owner</th>
+                <th>When</th>
+                <th>Task/Action & Subtasks</th>
+                <th>Comments</th>
+                <th>Outcomes/Evidence</th>
+                <th>Verified By</th>
+                <th>Completed</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <select id="status" name="status">
+                        <option value="open">Open</option>
+                        <option value="inProgress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </td>
+                <td><input type="text" name="actionOwner"></td>
+                <td><input type="text" id="when" name="when"></td>
+                <td>
+                    <select id="taskAction" name="taskAction">
+                        <option value="">Select a Task</option>
+                        <option value="Task1">Task 1</option>
+                        <option value="Task2">Task 2</option>
+                    </select>
+                    <div id="subtasksContainer"></div>
+                </td>
+                <td><input type="text" name="comments"></td>
+                <td><input type="text" name="outcomesEvidence"></td>
+                <td><input type="text" name="verifiedBy"></td>
+                <td><input type="checkbox" name="taskCompleted" class="task-completion-check"></td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script>
+    $(function() {
+        $("#when").datepicker();
+
+        $("#taskAction").change(function() {
+            var taskValue = $(this).val();
+            var subtasksHtml = '';
+
+            if (taskValue === 'Task1') {
+                subtasksHtml += '<table class="subtask-table">' +
+                                '<thead>' +
+                                '<tr>' +
+                                '<th>Subtask</th>' +
+                                '<th>Completed</th>' +
+                                '</tr>' +
+                                '</thead>' +
+                                '<tbody>' +
+                                '<tr>' +
+                                '<td>Subtask 1.1</td>' +
+                                '<td><input type="checkbox" name="subtaskCompleted[]" class="subtask-completion-check"></td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                '<td>Subtask 1.2</td>' +
+                                '<td><input type="checkbox" name="subtaskCompleted[]" class="subtask-completion-check"></td>' +
+                                '</tr>' +
+                                '</tbody>' +
+                                '</table>';
+            } else if (taskValue === 'Task2') {
+                subtasksHtml += '<table class="subtask-table">' +
+                                '<thead>' +
+                                '<tr>' +
+                                '<th>Subtask</th>' +
+                                '<th>Completed</th>' +
+                                '</tr>' +
+                                '</thead>' +
+                                '<tbody>' +
+                                '<tr>' +
+                                '<td>Subtask 2.1</td>' +
+                                '<td><input type ofcheckbox" name="subtaskCompleted[]" class="subtask-completion-check"></td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                '<td>Subtask 2.2</td>' +
+                                '<td><input type="checkbox" name="subtaskCompleted[]" class="subtask-completion-check"></td>' +
+                                '</tr>' +
+                                '</tbody>' +
+                                '</table>';
+            }
+
+            $("#subtasksContainer").html(subtasksHtml);
+            $(".subtask-completion-check").change(updateStatus);
+        });
+
+        function updateStatus() {
+            var allCheckboxes = $(".task-completion-check, .subtask-completion-check");
+            var checkedCheckboxes = $(".task-completion-check:checked, .subtask-completion-check:checked");
+
+            if (checkedCheckboxes.length === 0) {
+                $("#status").val("open");
+            } else if (checkedCheckboxes.length < allCheckboxes.length) {
+                $("#status").val("inProgress");
+            } else {
+                $("#status").val("completed");
+            }
+        }
+
+        $(".task-completion-check").change(updateStatus);
+
+        // Initial status update based on the default state of checkboxes
+        updateStatus();
+    });
+</script>
+
+</body>
+</html>
