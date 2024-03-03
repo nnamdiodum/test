@@ -1,0 +1,72 @@
+import java.util.*;
+
+public class ComplexStringParser {
+
+    public static void main(String[] args) {
+        String input = "Underlyings{AssetDetails[{Class,IsComp}],AssetId[],Class}";
+        Map<String, Object> result = parseStringToMap(input);
+        System.out.println(result);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> parseStringToMap(String input) {
+        Map<String, Object> map = new HashMap<>();
+        Stack<Object> stack = new Stack<>();
+        stack.push(map);
+
+        String currentToken = "";
+        for (char c : input.toCharArray()) {
+            switch (c) {
+                case '{':
+                    Map<String, Object> newMap = new HashMap<>();
+                    if (!stack.isEmpty() && stack.peek() instanceof List) {
+                        ((List<Object>) stack.peek()).add(newMap);
+                    } else {
+                        ((Map<String, Object>) stack.peek()).put(currentToken, newMap);
+                    }
+                    stack.push(newMap);
+                    currentToken = "";
+                    break;
+                case '[':
+                    List<Object> newList = new ArrayList<>();
+                    ((Map<String, Object>) stack.peek()).put(currentToken, newList);
+                    stack.push(newList);
+                    currentToken = "";
+                    break;
+                case ']':
+                case '}':
+                    if (!currentToken.isEmpty()) {
+                        if (stack.peek() instanceof Map) {
+                            ((Map<String, Object>) stack.peek()).put(currentToken, new Object());
+                        } else if (stack.peek() instanceof List) {
+                            ((List<Object>) stack.peek()).add(currentToken);
+                        }
+                        currentToken = "";
+                    }
+                    stack.pop();
+                    break;
+                case ',':
+                    if (!currentToken.isEmpty()) {
+                        if (stack.peek() instanceof Map) {
+                            ((Map<String, Object>) stack.peek()).put(currentToken, new Object());
+                        } else if (stack.peek() instanceof List) {
+                            ((List<Object>) stack.peek()).add(currentToken);
+                        }
+                        currentToken = "";
+                    }
+                    break;
+                default:
+                    currentToken += c;
+                    break;
+            }
+        }
+
+        if (!currentToken.isEmpty()) { // Handle the last token, if any
+            if (!stack.isEmpty() && stack.peek() instanceof Map) {
+                ((Map<String, Object>) stack.peek()).put(currentToken, new Object());
+            }
+        }
+
+        return map;
+    }
+}
