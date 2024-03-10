@@ -1,0 +1,1 @@
+Pattern schemaPattern = Pattern.compile("schema (\\w+) = KeyValue\\[Class: \\{\"(\\w+)\"\\}\\]:\\\\(?:\\n\\t(\\w+): (\\w+)\\\\)*");
