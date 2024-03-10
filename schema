@@ -5,39 +5,39 @@ import java.util.regex.Pattern;
 
 public class SchemaParser {
 
-    public static Map<String, Object> parseSchemas(String content) {
-        Map<String, Object> schemaMap = new HashMap<>();
-        
-        // Regex pattern to match schema definitions
-        Pattern schemaPattern = Pattern.compile("schema (\\w+) = KeyValue\\[Class: \\{(\\'\\w+\\'\\)\\}\\]:\\\\(?:\\n\\t(\\w+): (\\w+)\\\\)*");
-        Matcher matcher = schemaPattern.matcher(content);
-        
-        while (matcher.find()) {
-            String schemaName = matcher.group(1);
+    public static Map<String, Map<String, Object>> parseSchemas(String content) {
+        Map<String, Map<String, Object>> schemaMap = new HashMap<>();
+
+        // Pattern to match schema names and their fields
+        Pattern schemaPattern = Pattern.compile("schema (\\w+) = KeyValue\\[Class: \\{“(\\w+)”\\}\\]:(.*?)(?=\\n\\n|$)", Pattern.DOTALL);
+        Matcher schemaMatcher = schemaPattern.matcher(content);
+
+        while (schemaMatcher.find()) {
+            String schemaName = schemaMatcher.group(1);
             Map<String, Object> fieldsMap = new HashMap<>();
-            
-            // Assuming there might be multiple fields per schema, capturing them in groups
-            // Adjust the regex as necessary to correctly capture all field definitions
-            Pattern fieldPattern = Pattern.compile("\\n\\t(\\w+): (\\w+)\\\\");
-            Matcher fieldMatcher = fieldPattern.matcher(content.substring(matcher.start(), matcher.end()));
-            
+
+            // Extracting fields and their types
+            String fieldsBlock = schemaMatcher.group(3);
+            Pattern fieldPattern = Pattern.compile("\\t(\\w+): (\\w+)|\\t\\((\\w+)\\) : (\\w+):\\t“([^”]+)”");
+            Matcher fieldMatcher = fieldPattern.matcher(fieldsBlock);
+
             while (fieldMatcher.find()) {
-                String fieldName = fieldMatcher.group(1);
-                String fieldType = fieldMatcher.group(2);
+                String fieldName = fieldMatcher.group(1) != null ? fieldMatcher.group(1) : fieldMatcher.group(3);
+                String fieldType = fieldMatcher.group(2) != null ? fieldMatcher.group(2) : fieldMatcher.group(4) + ": " + fieldMatcher.group(5);
                 fieldsMap.put(fieldName, fieldType);
             }
-            
+
             schemaMap.put(schemaName, fieldsMap);
         }
-        
+
         return schemaMap;
     }
     
     public static void main(String[] args) {
-        String content = "{\\rtf1\\ansi\\ansicpg1252\\cocoartf2708\\cocoatextscaling0\\cocoaplatform0{\\fonttbl\\f0\\fswiss\\fcharset0 Helvetica;}..."; // Your RTF content
-        Map<String, Object> schemaMap = parseSchemas(content);
+        String content = "your schema content"; // Load your content here
+        Map<String, Map<String, Object>> schemaMap = parseSchemas(content);
         
         // Print the schemaMap to verify
-        schemaMap.forEach((key, value) -> System.out.println(key + ": " + value.toString()));
+        schemaMap.forEach((key, value) -> System.out.println(key + ": " + value));
     }
 }
