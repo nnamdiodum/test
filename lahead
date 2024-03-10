@@ -1,0 +1,7 @@
+private static final Pattern SCHEMA_PATTERN = Pattern.compile(
+        "schema (\\w+) = KeyValue\\[Class: \\{“(\\w+)”\\}\\]:\\s*(.*?)(?=\\n(\\s*\\n|$))",
+        Pattern.DOTALL);
+
+private static final Pattern FIELD_PATTERN = Pattern.compile(
+        "(\\w+): (\\w+)",
+        Pattern.MULTILINE);
