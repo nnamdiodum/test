@@ -1,0 +1,43 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class SchemaParser {
+
+    public static Map<String, Object> parseSchemas(String content) {
+        Map<String, Object> schemaMap = new HashMap<>();
+        
+        // Regex pattern to match schema definitions
+        Pattern schemaPattern = Pattern.compile("schema (\\w+) = KeyValue\\[Class: \\{(\\'\\w+\\'\\)\\}\\]:\\\\(?:\\n\\t(\\w+): (\\w+)\\\\)*");
+        Matcher matcher = schemaPattern.matcher(content);
+        
+        while (matcher.find()) {
+            String schemaName = matcher.group(1);
+            Map<String, Object> fieldsMap = new HashMap<>();
+            
+            // Assuming there might be multiple fields per schema, capturing them in groups
+            // Adjust the regex as necessary to correctly capture all field definitions
+            Pattern fieldPattern = Pattern.compile("\\n\\t(\\w+): (\\w+)\\\\");
+            Matcher fieldMatcher = fieldPattern.matcher(content.substring(matcher.start(), matcher.end()));
+            
+            while (fieldMatcher.find()) {
+                String fieldName = fieldMatcher.group(1);
+                String fieldType = fieldMatcher.group(2);
+                fieldsMap.put(fieldName, fieldType);
+            }
+            
+            schemaMap.put(schemaName, fieldsMap);
+        }
+        
+        return schemaMap;
+    }
+    
+    public static void main(String[] args) {
+        String content = "{\\rtf1\\ansi\\ansicpg1252\\cocoartf2708\\cocoatextscaling0\\cocoaplatform0{\\fonttbl\\f0\\fswiss\\fcharset0 Helvetica;}..."; // Your RTF content
+        Map<String, Object> schemaMap = parseSchemas(content);
+        
+        // Print the schemaMap to verify
+        schemaMap.forEach((key, value) -> System.out.println(key + ": " + value.toString()));
+    }
+}
