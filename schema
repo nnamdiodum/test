@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -5,26 +8,26 @@ import java.util.regex.Pattern;
 
 public class SchemaParser {
 
-    public static Map<String, Map<String, Object>> parseSchemas(String content) {
-        Map<String, Map<String, Object>> schemaMap = new HashMap<>();
+    private static final Pattern SCHEMA_PATTERN = Pattern.compile(
+            "schema (\\w+) = KeyValue\\[Class: \\{“(\\w+)”\\}\\]:\\s*(.*?)(?=\\n\\n|$)",
+            Pattern.DOTALL);
 
-        // Pattern to match schema names and their fields
-        Pattern schemaPattern = Pattern.compile("schema (\\w+) = KeyValue\\[Class: \\{“(\\w+)”\\}\\]:(.*?)(?=\\n\\n|$)", Pattern.DOTALL);
-        Matcher schemaMatcher = schemaPattern.matcher(content);
+    private static final Pattern FIELD_PATTERN = Pattern.compile(
+            "\\n\\t(\\w+): (\\w+)",
+            Pattern.DOTALL);
 
+    public static Map<String, Map<String, String>> parseSchemas(String content) {
+        Map<String, Map<String, String>> schemaMap = new HashMap<>();
+
+        Matcher schemaMatcher = SCHEMA_PATTERN.matcher(content);
         while (schemaMatcher.find()) {
             String schemaName = schemaMatcher.group(1);
-            Map<String, Object> fieldsMap = new HashMap<>();
+            String schemaBody = schemaMatcher.group(3);
 
-            // Extracting fields and their types
-            String fieldsBlock = schemaMatcher.group(3);
-            Pattern fieldPattern = Pattern.compile("\\t(\\w+): (\\w+)|\\t\\((\\w+)\\) : (\\w+):\\t“([^”]+)”");
-            Matcher fieldMatcher = fieldPattern.matcher(fieldsBlock);
-
+            Map<String, String> fieldsMap = new HashMap<>();
+            Matcher fieldMatcher = FIELD_PATTERN.matcher(schemaBody);
             while (fieldMatcher.find()) {
-                String fieldName = fieldMatcher.group(1) != null ? fieldMatcher.group(1) : fieldMatcher.group(3);
-                String fieldType = fieldMatcher.group(2) != null ? fieldMatcher.group(2) : fieldMatcher.group(4) + ": " + fieldMatcher.group(5);
-                fieldsMap.put(fieldName, fieldType);
+                fieldsMap.put(fieldMatcher.group(1), fieldMatcher.group(2));
             }
 
             schemaMap.put(schemaName, fieldsMap);
@@ -32,12 +35,21 @@ public class SchemaParser {
 
         return schemaMap;
     }
-    
+
     public static void main(String[] args) {
-        String content = "your schema content"; // Load your content here
-        Map<String, Map<String, Object>> schemaMap = parseSchemas(content);
-        
-        // Print the schemaMap to verify
-        schemaMap.forEach((key, value) -> System.out.println(key + ": " + value));
+        Path filePath = Path.of("/path/to/your/text/file.txt"); // Update the file path
+
+        try {
+            String content = Files.readString(filePath);
+            Map<String, Map<String, String>> schemaMap = parseSchemas(content);
+
+            // Print the schemaMap to verify
+            schemaMap.forEach((key, value) -> {
+                System.out.println("Schema: " + key);
+                value.forEach((fieldKey, fieldType) -> System.out.println("\t" + fieldKey + ": " + fieldType));
+            });
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+        }
     }
 }
