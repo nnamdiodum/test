@@ -1,1 +1,4 @@
 Pattern schemaPattern = Pattern.compile("schema (\\w+) = KeyValue\\[Class: \\{\"(\\w+)\"\\}\\]:\\\\(?:\\n\\t(\\w+): (\\w+)\\\\)*");
+Pattern FIELD_PATTERN = Pattern.compile(
+        "\\n\\t(?:\\((\\w+)\\) : )?(\\w+): (?:\\w+|False)",
+        Pattern.DOTALL);
